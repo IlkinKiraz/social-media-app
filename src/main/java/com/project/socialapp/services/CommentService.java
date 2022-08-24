@@ -2,6 +2,7 @@ package com.project.socialapp.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import com.project.socialapp.entities.Post;
 import com.project.socialapp.entities.User;
 import com.project.socialapp.request.CommentCreateRequest;
 import com.project.socialapp.request.CommentUpdateRequest;
+import com.project.socialapp.response.CommentResponse;
 import com.project.socialapp.repository.CommentRepository;
 
 
@@ -31,16 +33,19 @@ public class CommentService {
 	}
 	
 	
-	public List<Comment> getAllComments(Optional<Long> userId, Optional<Long> postId){
+	public List<CommentResponse> getAllComments(Optional<Long> userId, Optional<Long> postId){
+		List<Comment> comments;
 		if (userId.isPresent() && postId.isPresent()) {
-			return commentRepository.findByUserIdAndPostId(userId.get(), postId.get());
+			comments = commentRepository.findByUserIdAndPostId(userId.get(), postId.get());
 		} else if (postId.isPresent()) {
-			return commentRepository.findByUserId(postId.get());
+			comments = commentRepository.findByUserId(postId.get());
 		} else if (userId.isPresent()) {
-			return commentRepository.findByUserId(userId.get());
+			comments = commentRepository.findByUserId(userId.get());
 		} else {
-			return commentRepository.findAll();
+			comments = commentRepository.findAll();
 		}
+		
+		return comments.stream().map(comment -> new CommentResponse(comment)).collect(Collectors.toList());
 }
 
 	
